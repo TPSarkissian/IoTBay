@@ -1,0 +1,170 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #02040F;
+    color: #FFF;
+    margin: 0;
+}
+
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #02040F;
+    padding: 30px;
+    width: 100%;
+}
+
+input[type="password"],
+input[type="email"],
+input[type="text"] {
+    display: block;
+    width: calc(100% - 25px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    border: 1px #FFF solid;
+    font-size: 16px;
+    background-color: #02040F;
+    color: #FFF;
+}
+
+button {
+    background-color: #840032;
+    color: #FFF;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+::placeholder {
+    color: #FFF;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.error_message {
+    color: #840032;
+    font-size: 14px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+h1 {
+    text-align: center;
+    font-size: 80px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 150px;
+    background-color: #FFF;
+    position: fixed;
+    height: 100%;
+    overflow: none;
+    font-weight: bold;
+}
+
+li a {
+    display: block;
+    color: #02040F;
+    padding: 10px 20px;
+    text-decoration: none;
+}
+
+li a.active {
+    background-color: #02040F;
+    color: #FFF;
+}
+
+li a:hover:not(.active) {
+    background-color: #840032;
+    color: #FFF;
+}
+
+.bottom_button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.bottom_button button {
+    width: 100%;
+    border-radius: 0;
+    font-weight: bold;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.shop-box {
+    width: calc(20% - 42px);
+    margin: 10px;
+    padding: 10px;
+    padding-bottom: 40px;
+    background-color: #fff;
+    color: #02040F;
+    border: 1px solid #ccc;
+    text-align: center;
+    border-radius: 5px;
+    position: relative;
+}
+
+.shop-box img {
+    width: 100%;
+    height: auto;
+}
+
+.shop-box h4 {
+    padding: 5px;
+}
+
+.shop-box button {
+    background-color: #E59500;
+    color: #fff;
+    font-size: 15px;
+    transform: translate(-50%, 0%);
+    position: absolute;
+    bottom: 10px;
+}
+
+.container {
+    margin-left: 200px;
+    margin-right: 50px;
+    padding: 20px;
+}
+
+.debug {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 20px;
+    margin: 70px;
+
+}
+
+hr {
+    margin-top: 30px;
+    margin-bottom: 50px;
+    width: 25%;
+    margin-left: 0;
+    opacity: 0.3;
+}
+
+h1 a {
+    text-decoration: none;
+    color: #fff;
+}
