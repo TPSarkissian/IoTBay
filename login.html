@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IoTBay - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script type="module" src="firebase.js"></script>
+    <form>
+        <h1><a href="index.html">IoTBay</a></h1>
+        <h3>Login</h3>
+        <input type="email" placeholder="Email" id="email" name="email" required>
+        <input type="password" placeholder="Password" id="password" name="password" required>
+        <div id="error_message" class="error_message"></div>
+        <button type="button" onclick="login()">Login</button>
+        <button onclick="location.href='register.html'" type="button">Want to create an account? Register</button>
+    </form>
+</body>
+
+</html>
