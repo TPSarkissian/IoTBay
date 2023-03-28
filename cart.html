@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IoTBay - Cart</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script type="module" src="firebase.js"></script>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="cart.html" class="active">Cart</a></li>
+        <li><a href="tracking.html">Tracking</a></li>
+        <li><a href="receipts.html">Receipts</a></li>
+        <div id="not_anon">
+            <li><a href="profile.html">Profile</a></li>
+        </div>
+        <div id="staff_only">
+            <br>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html">Stock</a></li>
+        </div>
+        <div class="bottom_button">
+            <button id="action_button" type="button"></button>
+        </div>
+    </ul>
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Payment Information</h2>
+            <input type="text" placeholder="Visa/Mastercard Card Number" id="cardNumber" name="cardNumber"
+                maxlength="16">
+            <select onchange="updateShippingTotal()" style="margin-right: 5px;" class="select" name='expireMM'
+                id='expireMM'>
+                <option value=''>Month</option>
+                <option value='01'>January</option>
+                <option value='02'>February</option>
+                <option value='03'>March</option>
+                <option value='04'>April</option>
+                <option value='05'>May</option>
+                <option value='06'>June</option>
+                <option value='07'>July</option>
+                <option value='08'>August</option>
+                <option value='09'>September</option>
+                <option value='10'>October</option>
+                <option value='11'>November</option>
+                <option value='12'>December</option>
+            </select>
+            <select onchange="updateShippingTotal()" style="margin-right: 5px;" class="select" name='expireYY'
+                id='expireYY'>
+                <option value=''>Year</option>
+                <option value='23'>2023</option>
+                <option value='24'>2024</option>
+                <option value='25'>2025</option>
+                <option value='26'>2026</option>
+                <option value='27'>2027</option>
+                <option value='28'>2028</option>
+                <option value='29'>2029</option>
+            </select>
+            <input style="display: inline; width: calc(32% - 25px);" type="text" placeholder="CVV" id="cvv" name="cvv"
+                maxlength="4">
+            <h2>Shipping Details</h2>
+            <input type="text" placeholder="Country" id="country" name="country">
+            <input type="text" placeholder="Shipping Address 1" id="shippingAddress1" name="shippingAddress1">
+            <input type="text" placeholder="Shipping Address 2" id="shippingAddress2" name="shippingAddress2">
+            <input type="text" placeholder="City" id="city" name="city">
+            <input type="text" placeholder="State" id="state" name="state">
+            <input type="text" placeholder="Postal Address" id="postalAddress" name="postalAddress">
+            <select onchange="updateShippingTotal()" style="width: 100%" class="select" name='shippingType'
+                id='shippingType'>
+                <option value=''>Shipping Type</option>
+                <option value='0'>Standard (Arrives in 2 to 3 weeks - $12.00)</option>
+                <option value='1'>Express (Arrives in 1 to 4 days - $38.50)</option>
+            </select>
+            <hr style="margin-top: 0">
+            <h4 id="order_total">Total: $0.00 (inc. $0.00 shipping)</h4>
+            <div id="error_message" class="error_message"></div>
+            <button style="background-color: #E59500;" onclick="validateForm()">Purchase</button>
+            <button style="background-color: #840032;"
+                onclick="document.getElementById('paymentModal').style.display='none'">Close</button>
+            <button id="clear_saved" onclick="clearSaved()">Clear Saved Fields</button>
+        </div>
+
+    </div>
+
+    <div class="container">
+        <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
+        <h2 style="display: inline; margin-right: 10px;">Your Cart</h2>
+        <hr>
+        <div class="sub_container">
+            <div id="container_space"></div>
+            <div id="container_bottom">
+                <div class="right_placeholder"><button style="background-color: #840032; margin-right: 5px;"
+                        onclick="removeAllItems()">Remove All Items</button><button
+                        onclick="document.getElementById('paymentModal').style.display='block'">Proceed to
+                        Payment</button>
+                </div>
+                <div class="left_placeholder">
+                    <h3 id="total">Total: $0.00</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("container_bottom").style.display = "none";
+    document.getElementById("clear_saved").style.display = "none";
+    document.getElementById("staff_only").style.display = "none";
+    document.getElementById("not_anon").style.display = "none";
+
+    var customerType = sessionStorage.getItem("Customer_Type");
+    var cardNumberInput = document.getElementById("cardNumber");
+    var expireMMSelect = document.getElementById("expireMM");
+    var expireYYSelect = document.getElementById("expireYY");
+    var cvvInput = document.getElementById("cvv");
+    var countryInput = document.getElementById("country");
+    var shippingAddress1Input = document.getElementById("shippingAddress1");
+    var shippingAddress2Input = document.getElementById("shippingAddress2");
+    var cityInput = document.getElementById("city");
+    var stateInput = document.getElementById("state");
+    var postalAddressInput = document.getElementById("postalAddress");
+    var shippingTypeSelect = document.getElementById("shippingType");
+
+    if (customerType == '0' || customerType == null) {
+        document.getElementById("action_button").innerHTML = "Login";
+        document.getElementById("action_button").onclick = function () {
+            location.href = 'login.html';
+        };
+    } else if (customerType == '1') {
+        document.getElementById("not_anon").style.display = "block";
+        if (localStorage.getItem("Saved_CN") != null || localStorage.getItem("Saved_Country") != null) {
+            document.getElementById("clear_saved").style.display = "inline";
+        }
+        document.getElementById("action_button").innerHTML = "Logout";
+        document.getElementById("action_button").onclick = function () {
+            logout();
+        };
+        if (sessionStorage.getItem("isStaff") == "TRUE") {
+            document.getElementById("staff_only").style.display = "block";
+        }
+
+        if (localStorage.getItem("Saved_CN") != null) {
+            cardNumberInput.value = localStorage.getItem("Saved_CN");
+        }
+
+        if (localStorage.getItem("Saved_EMM") != null) {
+            expireMMSelect.value = localStorage.getItem("Saved_EMM");
+        }
+
+        if (localStorage.getItem("Saved_EYY") != null) {
+            expireYYSelect.value = localStorage.getItem("Saved_EYY");
+        }
+
+        if (localStorage.getItem("Saved_CVV") != null) {
+            cvvInput.value = localStorage.getItem("Saved_CVV");
+        }
+
+        if (localStorage.getItem("Saved_Country") != null) {
+            countryInput.value = localStorage.getItem("Saved_Country");
+        }
+
+        if (localStorage.getItem("Saved_SA1") != null) {
+            shippingAddress1Input.value = localStorage.getItem("Saved_SA1");
+        }
+
+        if (localStorage.getItem("Saved_SA2") != null) {
+            shippingAddress2Input.value = localStorage.getItem("Saved_SA2");
+        }
+
+        if (localStorage.getItem("Saved_City") != null) {
+            cityInput.value = localStorage.getItem("Saved_City");
+        }
+
+        if (localStorage.getItem("Saved_State") != null) {
+            stateInput.value = localStorage.getItem("Saved_State");
+        }
+
+        if (localStorage.getItem("Saved_Postal") != null) {
+            postalAddressInput.value = localStorage.getItem("Saved_Postal");
+        }
+    }
+
+    var total = 0;
+    var shippingTotal = 0;
+
+    function updateCart() {
+        total = 0;
+        document.getElementById("container_space").innerHTML = "";
+        if (sessionStorage.getItem("Cart") != null && sessionStorage.getItem("Cart") != "{}") {
+            document.getElementById("container_bottom").style.display = "block";
+            var cartItems = JSON.parse(sessionStorage.getItem("Cart"));
+            var products = JSON.parse(sessionStorage.getItem("Products"));
+            for (var itemName in cartItems) {
+                var item = cartItems[itemName];
+                document.getElementById("container_space").innerHTML = document.getElementById("container_space").innerHTML + '<div class="item"><div class="item_img"><img src="' + products[parseInt(itemName) - 1]["Img"] + '" width="100%"></div><h3><a style="cursor:pointer;" onclick="openProductView(' + "'" + (parseInt(itemName)) + "'" + ')">' + products[parseInt(itemName) - 1]["Name"] + '</a></h3><div class="product_view_left"><h3>$' + parseFloat(products[parseInt(itemName) - 1]["Price"]).toFixed(2) + ' x' + item.quantity + '</h3></div><div class="product_view_right"><button style="background-color: #840032;" onclick="removeItem(' + "'" + parseInt(itemName) + "'" + ');">Remove</button></div></div>'
+                total = total + parseFloat(products[parseInt(itemName) - 1]["Price"]) * parseInt(item.quantity);
+            }
+        } else {
+            document.getElementById("container_bottom").style.display = "none";
+            document.getElementById("container_space").innerHTML = "<h3>Cart is empty...</h3>";
+        }
+        document.getElementById("total").innerHTML = "Total: $" + parseFloat(total).toFixed(2);
+    }
+
+    function clearSaved() {
+        document.getElementById("cardNumber").value = "";
+        document.getElementById("expireMM").value = "";
+        document.getElementById("expireYY").value = "";
+        document.getElementById("cvv").value = "";
+        document.getElementById("country").value = "";
+        document.getElementById("shippingAddress1").value = "";
+        document.getElementById("shippingAddress2").value = "";
+        document.getElementById("city").value = "";
+        document.getElementById("state").value = "";
+        document.getElementById("postalAddress").value = "";
+        document.getElementById("shippingType").value = "";
+        document.getElementById("clear_saved").style.display = "none";
+    }
+
+    function removeItem(id) {
+        var cart;
+        var cartStr = sessionStorage.getItem("Cart");
+        if (cartStr == null || cartStr.trim() === "") {
+            cart = {};
+        } else {
+            cart = JSON.parse(cartStr);
+        }
+        if (cart[id]) {
+            cart[id].quantity -= 1;
+            if (cart[id].quantity <= 0) {
+                delete cart[id];
+            }
+        }
+        sessionStorage.setItem("Cart", JSON.stringify(cart));
+        updateCart();
+    }
+
+    function removeAllItems() {
+        sessionStorage.removeItem("Cart");
+        updateCart();
+    }
+
+    async function openProductView(id) {
+        await loadProduct(id);
+        sessionStorage.setItem("Come_From", location.href);
+        location.href = 'product.html';
+    }
+
+    var modal = document.getElementById('paymentModal');
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function updateShippingTotal() {
+        if (expireMMSelect.value == "") {
+            expireMMSelect.style.color = "#ffffff81";
+        } else {
+            expireMMSelect.style.color = "#fff";
+        }
+        if (expireYYSelect.value == "") {
+            expireYYSelect.style.color = "#ffffff81";
+        } else {
+            expireYYSelect.style.color = "#fff";
+        }
+        if (shippingTypeSelect.value == "") {
+            shippingTypeSelect.style.color = "#ffffff81";
+        } else {
+            shippingTypeSelect.style.color = "#fff";
+        }
+        if (document.getElementById("shippingType").value == "" || document.getElementById("shippingType").value == "0") {
+            shippingTotal = 12.00;
+            document.getElementById("order_total").innerHTML = "Total: " + parseFloat(total + shippingTotal).toFixed(2) + " (Standard Shipping)";
+        } else {
+            shippingTotal = 38.50;
+            document.getElementById("order_total").innerHTML = "Total: " + parseFloat(total + shippingTotal).toFixed(2) + " (Express Shipping)";
+        }
+    }
+
+    async function validateForm() {
+        var cardNumberRegex = /^[0-9]{16}$/;
+        var cvvRegex = /^[0-9]{3,4}$/;
+
+        if (!cardNumberRegex.test(cardNumberInput.value)) {
+            document.getElementById("error_message").innerHTML = "Invalid input fields: Please enter a valid card number.";
+            return false;
+        }
+
+        var expireDate = new Date("20" + expireYYSelect.value, expireMMSelect.value);
+        var currentDate = new Date();
+        if (expireDate < currentDate) {
+            document.getElementById("error_message").innerHTML = "Invalid input fields: Please enter a valid expiration date.";
+            return false;
+        }
+
+        if (!cvvRegex.test(cvvInput.value)) {
+            document.getElementById("error_message").innerHTML = "Invalid input fields: Please enter a valid CVV code.";
+            return false;
+        }
+
+        if (
+            countryInput.value == "" ||
+            shippingAddress1Input.value == "" ||
+            cityInput.value == "" ||
+            stateInput.value == "" ||
+            postalAddressInput.value == "" ||
+            shippingTypeSelect.value == ""
+        ) {
+            document.getElementById("error_message").innerHTML = "Invalid input fields: Please fill in all required fields.";
+            return false;
+        }
+
+        document.getElementById("error_message").innerHTML = "";
+
+        if (customerType == "1") {
+            var savePayment = confirm("Do you want to save your payment and shipping details?");
+            if (savePayment) {
+                localStorage.setItem("Saved_CN", cardNumberInput.value);
+                localStorage.setItem("Saved_EMM", expireMMSelect.value);
+                localStorage.setItem("Saved_EYY", expireYYSelect.value);
+                localStorage.setItem("Saved_CVV", cvvInput.value);
+                localStorage.setItem("Saved_Country", countryInput.value);
+                localStorage.setItem("Saved_SA1", shippingAddress1Input.value);
+                localStorage.setItem("Saved_SA2", shippingAddress2Input.value);
+                localStorage.setItem("Saved_City", cityInput.value);
+                localStorage.setItem("Saved_State", stateInput.value);
+                localStorage.setItem("Saved_Postal", postalAddressInput.value);
+            }
+        }
+        sessionStorage.setItem("Order_Total", total);
+        sessionStorage.setItem("Shipping_Type", shippingTypeSelect.value);
+        sessionStorage.setItem("Shipping_Total", shippingTotal);
+        if (await sendOrder() == true) {
+            await getOrderViaTracking(sessionStorage.getItem("Tracking_ID"));
+            document.getElementById('paymentModal').style.display = 'none';
+            sessionStorage.removeItem("Cart");
+            location.href = 'tracking.html?id=' + sessionStorage.getItem("Tracking_ID");
+        }
+    }
+
+    updateCart();
+
+    updateShippingTotal();
+
+</script>
+
+</html>

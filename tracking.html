@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IoTBay - Tracking</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script type="module" src="firebase.js"></script>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="tracking.html" class="active">Tracking</a></li>
+        <li><a href="receipts.html">Receipts</a></li>
+        <div id="not_anon">
+            <li><a href="profile.html">Profile</a></li>
+        </div>
+        <div id="staff_only">
+            <br>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html">Stock</a></li>
+        </div>
+        <div class="bottom_button">
+            <button id="action_button" type="button"></button>
+        </div>
+    </ul>
+    <div class="container">
+        <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
+        <input type="text" style="display: inline; width: 500px; margin-right: 5px;" placeholder="Tracking Number"
+            id="search_box" name="Search"><button id="reset_query" style="background-color: #840032; margin-right: 5px;"
+            onclick="">X</button><button id="search_button" onclick="navigate()">Search</button>
+        <hr>
+        <div id="tacking_container">
+            <div id="container_space"></div>
+            <div id="container_bottom">
+                <div class="left_placeholder"
+                    style="border: 1px #FFF solid; padding-right: 20px; padding-left: 20px; border-radius: 5px;">
+                    <div style="display: inline-block;">
+                        <h5 id="order_status"></h5>
+                        <h5 id="order_total"></h5>
+                        <h5 id="order_date"></h5>
+                        <h5 id="tracking_id"></h5>
+                        <h5 id="order_id"></h5>
+                        <h5 id="transaction_id"></h5>
+                    </div>
+                    <div style="padding-left: 50px; display: inline-block;">
+                        <h5 id="shipping_type"></h5>
+                        <h5 id="shipping_country"></h5>
+                        <h5 id="shipping_state"></h5>
+                        <h5 id="shipping_address_1"></h5>
+                        <h5 id="shipping_address_2"></h5>
+                        <h5 id="shipping_postal_address"></h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("reset_query").style.display = "none";
+    document.getElementById("staff_only").style.display = "none";
+    document.getElementById("not_anon").style.display = "none";
+    document.getElementById("container_bottom").style.display = "none";
+
+    var customerType = sessionStorage.getItem("Customer_Type");
+
+    if (customerType == '0' || customerType == null) {
+        document.getElementById("action_button").innerHTML = "Login";
+        document.getElementById("action_button").onclick = function () {
+            location.href = 'login.html';
+        };
+    } else if (customerType == '1') {
+        document.getElementById("not_anon").style.display = "block";
+        document.getElementById("action_button").innerHTML = "Logout";
+        document.getElementById("action_button").onclick = function () {
+            logout();
+        };
+        if (sessionStorage.getItem("isStaff") == "TRUE") {
+            document.getElementById("staff_only").style.display = "block";
+        }
+    }
+
+    async function searchForOrder(trackingID) {
+        await getOrderViaTracking(trackingID);
+        updateCart();
+        if (trackingID == sessionStorage.getItem("Tracking_ID")) {
+            document.getElementById("order_date").innerHTML = "Order Date: " + sessionStorage.getItem("Order_Date");
+            document.getElementById("order_id").innerHTML = "Order ID: " + sessionStorage.getItem("Order_ID");
+            var order_status = sessionStorage.getItem("Order_Status");
+            if (order_status == "Processing") {
+                document.getElementById("order_status").innerHTML = "Order Status: <span style='color: #EE4B2B'>" + order_status + "</span>";
+            } else if (order_status == "Shipping") {
+                document.getElementById("order_status").innerHTML = "Order Status: <span style='color: #00FFFF'>" + order_status + "...</span>";
+            } else if (order_status == "Complete") {
+                document.getElementById("order_status").innerHTML = "Order Status: <span style='color: #32CD32'>" + order_status + " (Arrived at: " + sessionStorage.getItem("Order_Arrival") + ")</span>";
+            }
+            document.getElementById("order_total").innerHTML = "Order Total: <span style='color: #E59500'>$" + parseFloat(sessionStorage.getItem("Order_Total")).toFixed(2) + (" ( +$" + parseFloat(sessionStorage.getItem("Shipping_Total")).toFixed(2) + " shipping )</span>");
+            document.getElementById("shipping_type").innerHTML = sessionStorage.getItem("Shipping_Type") == "1" ? "Shipping Type: <span style='color: #E59500'>Express (Arrives in 1 to 4 days)</span>" : "Shipping Type: <span style='color: #E59500'>Standard (Arrives in 2 to 3 weeks)</span>";
+            document.getElementById("shipping_address_1").innerHTML = "Shipping Address 1: " + sessionStorage.getItem("Shipping_SA1");
+            document.getElementById("shipping_address_2").innerHTML = sessionStorage.getItem("Shipping_SA2") == "" ? "" : "Shipping Address 2: " + sessionStorage.getItem("Shipping_SA2");
+            document.getElementById("shipping_country").innerHTML = "Shipping Country: " + sessionStorage.getItem("Shipping_Country");
+            document.getElementById("shipping_state").innerHTML = "Shipping State: " + sessionStorage.getItem("Shipping_State");
+            document.getElementById("shipping_postal_address").innerHTML = "Shipping Postal Address: " + sessionStorage.getItem("Shipping_Postal");
+            document.getElementById("transaction_id").innerHTML = "Transaction ID: " + sessionStorage.getItem("Transaction_ID");
+            document.getElementById("tracking_id").innerHTML = "Tracking Number: " + sessionStorage.getItem("Tracking_ID");
+        } else {
+            document.getElementById("tacking_container").innerHTML = "<h3>Can't find order...</h3>"
+        }
+    }
+
+    document.getElementById("container_space").innerHTML = "<h3>Search for your order using your Tracking ID...<h3>";
+
+    function updateCart() {
+        document.getElementById("container_space").innerHTML = "";
+        if (sessionStorage.getItem("Order_Products") != null && sessionStorage.getItem("Order_Products") != "{}") {
+            document.getElementById("container_bottom").style.display = "block";
+            var purchaseItems = JSON.parse(sessionStorage.getItem("Order_Products"));
+            var products = JSON.parse(sessionStorage.getItem("Products"));
+            for (var itemName in purchaseItems) {
+                var item = purchaseItems[itemName];
+                document.getElementById("container_space").innerHTML = document.getElementById("container_space").innerHTML + '<div class="item"><div class="item_img"><img src="' + products[parseInt(itemName) - 1]["Img"] + '" width="100%"></div><h3><a style="cursor:pointer;" onclick="openProductView(' + "'" + (parseInt(itemName)) + "'" + ')">' + products[parseInt(itemName) - 1]["Name"] + '</a></h3><div class="product_view_left"><h3>x' + item.quantity + '</h3></div><div class="product_view_right"><h3>$' + parseFloat(products[parseInt(itemName) - 1]["Price"] * item.quantity).toFixed(2) + '</h3></div></div>'
+            }
+        } else {
+            document.getElementById("container_bottom").style.display = "none";
+            document.getElementById("container_space").innerHTML = "<h3>Can't find order...</h3>";
+        }
+    }
+
+    function navigate() {
+        location.href = "tracking.html?id=" + document.getElementById("search_box").value;
+    }
+
+    window.onload = async function () {
+        var queryParams = new URLSearchParams(window.location.search);
+        var id = queryParams.get('id');
+        if (id) {
+            document.getElementById("search_box").value = id;
+            await searchForOrder(id);
+        }
+    };
+
+    async function openProductView(id) {
+        await loadProduct(id);
+        sessionStorage.setItem("Come_From", location.href);
+        location.href = 'product.html';
+    }
+
+</script>
+
+</html>

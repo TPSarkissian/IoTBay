@@ -9,60 +9,34 @@
 <body>
     <script type="module" src="firebase.js"></script>
     <ul>
-        <li><a class="active" href="#home">Home</a></li>
-        <li id="staff_only"><a href="#admin">Admin Panel</a></li>
-        <li><a href="#shop">Shop</a></li>
-        <li><a href="#cart">Cart</a></li>
-        <li id="not_anon"><a href="#settings">Settings</a></li>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="tracking.html">Tracking</a></li>
+        <li><a href="receipts.html">Receipts</a></li>
+        <div id="not_anon">
+            <li><a href="profile.html">Profile</a></li>
+        </div>
+        <div id="staff_only">
+            <br>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html">Stock</a></li>
+        </div>
         <div class="bottom_button">
             <button id="action_button" type="button"></button>
         </div>
     </ul>
-
-    <div class="debug">
-        <h5 id="uid_output"></h5>
-        <h5 id="email_output"></h5>
-        <h5 id="rd_output"></h5>
-        <h5 id="staff_output"></h5>
-    </div>
     <div class="container">
-        <h1 style="text-align: left;"><a href="index.html">IoTBay</a></h1>
+        <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
         <h2 id="name_output"></h2>
         <hr>
-        <h2>Hot Deals</h2>
-        <div class="flex-container">
-            <div class="shop-box">
-                <img src="https://electronicscrew.com.au/wp-content/uploads/2022/09/0-6fa111-600x600.jpeg">
-                <h4>Smart WiFi Thermostat</h4>
-                <button>Unavaliable</button>
-            </div>
-            <div class="shop-box">
-                <img
-                    src="https://site-static.ecovacs.com/upload/au/image/product/2023/03/08/142201_9264-DEEBOT-T9-25thAnniversary-1280x1280.jpg">
-                <h4>DEEBOT T9+</h4>
-                <button>Unavaliable</button>
-            </div>
-            <div class="shop-box">
-                <img src="https://m.media-amazon.com/images/I/71O69-VehFL._SY450_.jpg">
-                <h4>Ring Video Doorbell Pro 2</h4>
-                <button>Unavaliable</button>
-            </div>
-            <div class="shop-box">
-                <img src="https://m.media-amazon.com/images/I/61vemF8o3xS._SY450_.jpg">
-                <h4>Floodlight Cam Wired Plus by Amazon</h4>
-                <button>Unavaliable</button>
-            </div>
-            <div class="shop-box">
-                <img
-                    src="https://cdn.shopify.com/s/files/1/0630/5660/9506/products/KORE2.0-1_540x_dacff28b-9153-40bd-a7de-f867e17ab818_540x.png?v=1655822969">
-                <h4>Kore 2.0 Smartwatch Top-Rated Fitness Tracker</h4>
-                <button>Unavaliable</button>
-            </div>
+        <div class="banner">
+            <h1 style="text-align: center; font-size: 100px; margin: 0; margin-bottom: 20px;">We have new arrivals!</h1>
+            <button style="display: block; margin: 0 auto;" onclick="location.href='shop.html'">Shop Now</button>
         </div>
     </div>
 </body>
 <script>
-    console.log("TEST");
     function generateRandomString(length) {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -71,15 +45,13 @@
         }
         return result;
     }
+
     document.getElementById("staff_only").style.display = "none";
     document.getElementById("not_anon").style.display = "none";
+
     var customerType = sessionStorage.getItem("Customer_Type");
     if (customerType == '0' || customerType == null) {
         document.getElementById("name_output").innerHTML = "Welcome, Anonymous Customer";
-        document.getElementById("email_output").innerHTML = "";
-        document.getElementById("uid_output").innerHTML = "";
-        document.getElementById("rd_output").innerHTML = "";
-        document.getElementById("staff_output").innerHTML = "";
         document.getElementById("action_button").innerHTML = "Login";
         document.getElementById("action_button").onclick = function () {
             location.href = 'login.html';
@@ -90,16 +62,9 @@
         document.getElementById("uid_output").innerHTML = `Customer ID: ${sessionStorage.getItem("Customer_ID")}`;
     } else if (customerType == '1') {
         var fullName = sessionStorage.getItem("Full_Name");
-        var email = sessionStorage.getItem("Email");
-        var customerId = sessionStorage.getItem("Customer_ID");
-        var registerDate = sessionStorage.getItem("Register_Date");
         var isStaff = sessionStorage.getItem("isStaff");
         document.getElementById("not_anon").style.display = "block";
         document.getElementById("name_output").innerHTML = `Welcome, ${fullName}`;
-        document.getElementById("email_output").innerHTML = `Email: ${email}`;
-        document.getElementById("uid_output").innerHTML = `Customer ID: ${customerId}`;
-        document.getElementById("rd_output").innerHTML = `Register Date: ${registerDate}`
-        document.getElementById("staff_output").innerHTML = `Staff Member: ${isStaff}`
         document.getElementById("action_button").innerHTML = "Logout";
         document.getElementById("action_button").onclick = function () {
             logout();

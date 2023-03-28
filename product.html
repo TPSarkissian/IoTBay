@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IoTBay - Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script type="module" src="firebase.js"></script>
+    <ul>
+        <li><a class="active" id="go_back" href="shop.html">&#8592 Go Back</a></li>
+        <div class="bottom_button">
+            <button id="action_button" type="button"></button>
+        </div>
+    </ul>
+    <div class="container">
+        <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
+        <hr>
+        <img id="img_output" style="padding-right: 50px;" src="" height="400px" width="400px" align="left">
+        <h1 id="name_output">Product name</h1>
+        <h3 id="price_output">$0.00</h3>
+        <hr>
+        <p id="description_output">Product description</p>
+        <br>
+        <button style="margin-right: 10px;" id="add_to_cart_button" onclick="addToCart()">Add to Cart</button>
+        <div style="display: inline;" id="error_message" class="error_message"></div>
+        <h5 id="stock_output" style="margin: 0; padding-top: 10px;">Avaliable: 0</h5>
+    </div>
+</body>
+<script>
+    var customerType = sessionStorage.getItem("Customer_Type");
+    if (customerType == '0' || customerType == null) {
+        document.getElementById("action_button").innerHTML = "Login";
+        document.getElementById("action_button").onclick = function () {
+            location.href = 'login.html';
+        };
+    } else if (customerType == '1') {
+        document.getElementById("action_button").innerHTML = "Logout";
+        document.getElementById("action_button").onclick = function () {
+            logout();
+        };
+    }
+    document.getElementById("description_output").innerHTML = sessionStorage.getItem("Product_Description");
+    document.getElementById("name_output").innerHTML = sessionStorage.getItem("Product_Name");
+    document.getElementById("price_output").innerHTML = "$" + parseFloat(sessionStorage.getItem("Product_Price")).toFixed(2);
+    document.getElementById("stock_output").innerHTML = "Avaliable: " + sessionStorage.getItem("Product_Stock");
+    document.getElementById("img_output").src = sessionStorage.getItem("Product_Img");
+
+    var cart;
+    var cartStr = sessionStorage.getItem("Cart");
+    if (cartStr == null || cartStr.trim() === "") {
+        cart = {};
+    } else {
+        cart = JSON.parse(cartStr);
+    }
+    if (cart[sessionStorage.getItem("Product_ID")]) {
+        document.getElementById("add_to_cart_button").innerHTML = "Add to Cart (" + cart[sessionStorage.getItem("Product_ID")].quantity + " Added)";
+    }
+    if (sessionStorage.getItem("Product_Stock") <= 0) {
+        document.getElementById("add_to_cart_button").innerHTML = "Out of Stock";
+        document.getElementById("add_to_cart_button").style.backgroundColor = "#840032";
+    }
+
+    function addToCart() {
+        var cart;
+        var cartStr = sessionStorage.getItem("Cart");
+        if (cartStr == null || cartStr.trim() === "") {
+            cart = {};
+        } else {
+            cart = JSON.parse(cartStr);
+        }
+        if (cart[sessionStorage.getItem("Product_ID")]) {
+            if (cart[sessionStorage.getItem("Product_ID")].quantity >= parseInt(sessionStorage.getItem("Product_Stock"))) {
+                document.getElementById("error_message").innerHTML = "Error adding to cart: Can't exceed stock limit.";
+            } else {
+                cart[sessionStorage.getItem("Product_ID")].quantity += 1;
+                document.getElementById("add_to_cart_button").innerHTML = "Add to Cart (" + cart[sessionStorage.getItem("Product_ID")].quantity + " Added)";
+            }
+        } else {
+            if (sessionStorage.getItem("Product_Stock") > 0) {
+                cart[sessionStorage.getItem("Product_ID")] = {
+                    quantity: 1,
+                };
+                document.getElementById("add_to_cart_button").innerHTML = "Add to Cart (" + cart[sessionStorage.getItem("Product_ID")].quantity + " Added)";
+            } else {
+                document.getElementById("error_message").innerHTML = "Error adding to cart: Out of stock.";
+            }
+        }
+        sessionStorage.setItem("Cart", JSON.stringify(cart));
+    }
+
+    document.getElementById("go_back").href = sessionStorage.getItem("Come_From");
+
+</script>
+
+</html>

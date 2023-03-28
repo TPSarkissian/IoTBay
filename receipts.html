@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IoTBay - Receipts</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script type="module" src="firebase.js"></script>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="tracking.html">Tracking</a></li>
+        <li><a href="receipts.html" class="active">Receipts</a></li>
+        <div id="not_anon">
+            <li><a href="profile.html">Profile</a></li>
+        </div>
+        <div id="staff_only">
+            <br>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="">Stock</a></li>
+        </div>
+        <div class="bottom_button">
+            <button id="action_button" type="button"></button>
+        </div>
+    </ul>
+    <div class="container">
+        <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
+        <h2 style="display: inline; margin-right: 10px;">Transaction History</h2>
+        <hr>
+        <div class="sub_container">
+            <div id="container_space"></div>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("staff_only").style.display = "none";
+    document.getElementById("not_anon").style.display = "none";
+
+    var customerType = sessionStorage.getItem("Customer_Type");
+
+    if (customerType == '0' || customerType == null) {
+        document.getElementById("action_button").innerHTML = "Login";
+        document.getElementById("action_button").onclick = function () {
+            location.href = 'login.html';
+        };
+    } else if (customerType == '1') {
+        document.getElementById("not_anon").style.display = "block";
+        document.getElementById("action_button").innerHTML = "Logout";
+        document.getElementById("action_button").onclick = function () {
+            logout();
+        };
+        if (sessionStorage.getItem("isStaff") == "TRUE") {
+            document.getElementById("staff_only").style.display = "block";
+        }
+    }
+
+    function navigate(id) {
+        location.href = "tracking.html?id=" + id;
+    }
+
+    window.onload = async function () {
+        await findAllCustomerTranscations(sessionStorage.getItem("Customer_ID"));
+        document.getElementById("container_space").innerHTML = "";
+        if (sessionStorage.getItem("Receipts") != null && sessionStorage.getItem("Receipts") != "[]") {
+            var transactionHistroy = JSON.parse(sessionStorage.getItem("Receipts"));
+            for (var itemName in transactionHistroy) {
+                document.getElementById("container_space").innerHTML = document.getElementById("container_space").innerHTML + '<div class="item" style="padding-left: 40px;"><h3><a style="cursor:pointer;" onclick="navigate(' + "'" + transactionHistroy[itemName]["trackingId"] + "'" + ')">Tracking ID: ' + transactionHistroy[itemName]["trackingId"] + '</a></h3><div class="product_view_left" style="padding-right: 30px;"><h3>$' + (parseFloat(transactionHistroy[itemName]["data"]["orderTotal"]) + parseFloat(transactionHistroy[itemName]["data"]["shippingTotal"])).toFixed(2) + '</h3></div><div class="product_view_right" style="padding-right: 30px;"><button onclick="navigate(' + "'" + transactionHistroy[itemName]["trackingId"] + "'" + ')">More Details</button></div></div>'
+            }
+        } else {
+            document.getElementById("container_space").innerHTML = "<h3>Can't find receipts...</h3>";
+        }
+    };
+</script>
+
+</html>
