@@ -180,7 +180,7 @@ hr {
 }
 
 .item {
-    width: 60%;
+    width: 80%;
     margin: auto;
     padding: 20px;
     padding-left: 140px;
@@ -200,7 +200,7 @@ hr {
 
 #container_bottom {
     background-color: #02040F;
-    width: 60%;
+    width: 80%;
     margin: auto;
     padding: 20px;
     padding-left: 140px;

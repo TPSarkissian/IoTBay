@@ -294,12 +294,12 @@ window.sendOrder = async function sendOrder() {
                         orderArrival: "",
                         orderStatus: "Processing",
                         orderTotal: sessionStorage.getItem("Order_Total"),
-                        shippingAddress1: localStorage.getItem("Saved_SA1"),
-                        shippingAddress2: localStorage.getItem("Saved_SA2"),
-                        shippingCity: localStorage.getItem("Saved_City"),
-                        shippingState: localStorage.getItem("Saved_State"),
-                        shippingCountry: localStorage.getItem("Saved_Country"),
-                        shippingPostalAddress: localStorage.getItem("Saved_Postal"),
+                        shippingAddress1: sessionStorage.getItem("Temp_SA1"),
+                        shippingAddress2: sessionStorage.getItem("Temp_SA2"),
+                        shippingCity: sessionStorage.getItem("Temp_City"),
+                        shippingState: sessionStorage.getItem("Temp_State"),
+                        shippingCountry: sessionStorage.getItem("Temp_Country"),
+                        shippingPostalAddress: sessionStorage.getItem("Temp_Postal"),
                         shippingTotal: sessionStorage.getItem("Shipping_Total"),
                         shippingType: sessionStorage.getItem("Shipping_Type"),
                         products: products,
@@ -310,13 +310,14 @@ window.sendOrder = async function sendOrder() {
         }
         return true;
     } else {
-        sendOrder();
+        alert("There was an error sending order, please try again.");
+        return false;
     }
 }
 
 window.getOrderViaTracking = async function getOrderViaTracking(id) {
-    const docRef = doc(db, "orders", String(id));
-    const docSnap = await getDoc(docRef);
+    var docRef = doc(db, "orders", String(id));
+    var docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
         sessionStorage.setItem("Tracking_ID", id);
         sessionStorage.setItem("Order_Date", docSnap.data()["orderDate"]);

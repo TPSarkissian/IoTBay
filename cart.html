@@ -332,6 +332,13 @@
         sessionStorage.setItem("Order_Total", total);
         sessionStorage.setItem("Shipping_Type", shippingTypeSelect.value);
         sessionStorage.setItem("Shipping_Total", shippingTotal);
+        sessionStorage.setItem("Temp_Country", countryInput.value);
+        sessionStorage.setItem("Temp_SA1", shippingAddress1Input.value);
+        sessionStorage.setItem("Temp_SA2", shippingAddress2Input.value);
+        sessionStorage.setItem("Temp_City", cityInput.value);
+        sessionStorage.setItem("Temp_State", stateInput.value);
+        sessionStorage.setItem("Temp_Postal", postalAddressInput.value);
+        
         if (await sendOrder() == true) {
             await getOrderViaTracking(sessionStorage.getItem("Tracking_ID"));
             document.getElementById('paymentModal').style.display = 'none';
