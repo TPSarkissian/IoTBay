@@ -45,10 +45,10 @@ window.authstate = function authState() {
 window.addEventListener('load', window.authstate);
 
 window.register = async function register() {
-    const full_name = document.getElementById("full_name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const confirm_password = document.getElementById("confirm_password").value;
+    var full_name = document.getElementById("full_name").value;
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+    var confirm_password = document.getElementById("confirm_password").value;
 
     if (password == "" || confirm_password == "" || email == "" || full_name == "") {
         document.getElementById("error_message").innerHTML = "Invalid input fields: One or more input fields are empty.";
@@ -63,7 +63,7 @@ window.register = async function register() {
             const user = userCredential.user;
             sessionStorage.setItem("Full_Name", full_name);
             await updateProfile(user, {
-                displayName: full_name
+                displayName: sessionStorage.getItem("Full_Name")
             }).then(function () {
                 sessionStorage.setItem("Customer_Type", 1);
                 sessionStorage.setItem("Customer_ID", user.uid);
