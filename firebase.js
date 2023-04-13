@@ -44,7 +44,7 @@ window.authstate = function authState() {
 }
 window.addEventListener('load', window.authstate);
 
-window.register = function register() {
+window.register = async function register() {
     const full_name = document.getElementById("full_name").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -58,7 +58,7 @@ window.register = function register() {
         return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
+    await createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
             const user = userCredential.user;
             sessionStorage.setItem("Full_Name", full_name);
@@ -95,7 +95,7 @@ window.register = function register() {
         });
 }
 
-window.login = function login() {
+window.login = async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
@@ -104,7 +104,7 @@ window.login = function login() {
         return;
     }
 
-    signInWithEmailAndPassword(auth, email, password)
+    await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
             sessionStorage.setItem("Customer_Type", 1);

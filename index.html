@@ -59,7 +59,6 @@
         if (sessionStorage.getItem("Customer_ID") === null) {
             sessionStorage.setItem("Customer_ID", generateRandomString(28));
         }
-        document.getElementById("uid_output").innerHTML = `Customer ID: ${sessionStorage.getItem("Customer_ID")}`;
     } else if (customerType == '1') {
         var fullName = sessionStorage.getItem("Full_Name");
         var isStaff = sessionStorage.getItem("isStaff");
