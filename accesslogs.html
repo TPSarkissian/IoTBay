@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>IoTBay - Receipts</title>
+    <title>IoTBay - Access Logs</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -13,15 +13,16 @@
         <li><a href="shop.html">Shop</a></li>
         <li><a href="cart.html">Cart</a></li>
         <li><a href="tracking.html">Tracking</a></li>
-        <li><a href="receipts.html" class="active">Receipts</a></li>
+        <li><a href="receipts.html">Receipts</a></li>
         <div id="not_anon">
             <li><a href="profile.html">Profile</a></li>
-            <li><a href="accesslogs.html">Access Logs</a></li>
+            <li><a href="accesslogs.html" class="active">Access Logs</a></li>
         </div>
         <div id="staff_only">
             <br>
-            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
-            <li style="background-color: #E59500;"><a style="color: #FFF;" href="">Stock</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a>
+            </li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html">Stock</a></li>
             <li style="background-color: #E59500;"><a style="color: #FFF;" href="logs.html">Admin Logs</a></li>
         </div>
         <div class="bottom_button">
@@ -30,7 +31,7 @@
     </ul>
     <div class="container">
         <h1 class="logo" style="text-align: left;"><a href="index.html">IoTBay</a></h1>
-        <h2 style="display: inline; margin-right: 10px;">Transaction History</h2>
+        <h2 style="display: inline; margin-right: 10px;">Access Logs</h2>
         <hr>
         <div class="sub_container">
             <div id="container_space"></div>
@@ -59,21 +60,29 @@
         }
     }
 
-    function navigate(id) {
-        location.href = "tracking.html?id=" + id;
+    async function getLogStatus() {
+        var logTransactions = JSON.parse(sessionStorage.getItem("User_Logs"));
+        if (logTransactions.length > 0) {
+            for (var itemName in logTransactions) {
+                var date = new Date(logTransactions[itemName]["data"]["logTimestamp"]);
+                var year = date.getFullYear();
+                var month = String(date.getMonth() + 1).padStart(2, '0');
+                var day = String(date.getDate()).padStart(2, '0');
+                var hours = String(date.getHours()).padStart(2, '0');
+                var minutes = String(date.getMinutes()).padStart(2, '0');
+                var seconds = String(date.getSeconds()).padStart(2, '0');
+                var dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                console.log(logTransactions[itemName]["data"]);
+                document.getElementById("container_space").innerHTML = document.getElementById("container_space").innerHTML + "<span style='color: #00ff00;'>[" + dateTimeString + "] </span> : " + logTransactions[itemName]["data"]["logAction"] + "<br><br>";
+            }
+        } else {
+            document.getElementById("container_space").innerHTML = "<h3>There are currently no user access logs...</h3>";
+        }
     }
 
     window.onload = async function () {
-        await findAllCustomerTranscations(sessionStorage.getItem("Customer_ID"));
-        document.getElementById("container_space").innerHTML = "";
-        if (sessionStorage.getItem("Receipts") != null && sessionStorage.getItem("Receipts") != "[]") {
-            var transactionHistroy = JSON.parse(sessionStorage.getItem("Receipts"));
-            for (var itemName in transactionHistroy) {
-                document.getElementById("container_space").innerHTML = document.getElementById("container_space").innerHTML + '<div class="item" style="padding-left: 40px;"><h3><a style="cursor:pointer;" onclick="navigate(' + "'" + transactionHistroy[itemName]["trackingId"] + "'" + ')">Tracking ID: ' + transactionHistroy[itemName]["trackingId"] + '</a></h3><div class="product_view_left" style="padding-right: 30px;"><h3>$' + (parseFloat(transactionHistroy[itemName]["data"]["orderTotal"]) + parseFloat(transactionHistroy[itemName]["data"]["shippingTotal"])).toFixed(2) + '</h3></div><div class="product_view_right" style="padding-right: 30px;"><button onclick="navigate(' + "'" + transactionHistroy[itemName]["trackingId"] + "'" + ')">More Details</button></div></div>'
-            }
-        } else {
-            document.getElementById("container_space").innerHTML = "<h3>Can't find any receipts...</h3>";
-        }
+        await findUserLogs(sessionStorage.getItem("Customer_ID"));
+        await getLogStatus();
     };
 </script>
 

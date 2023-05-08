@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"
 import { getFirestore, doc, getDoc, getDocs, collection, setDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"
 
 const firebaseConfig = {
@@ -15,6 +15,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 
+async function sendLog(id, action, type) {
+    var now = new Date().valueOf();
+    await setDoc(doc(db, "logs", id + ":" + now.toString()), {
+        logUser: id,
+        logTimestamp: now,
+        logAction: action,
+        logType: type
+    }, { merge: true });
+}
+
 window.authstate = function authState() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -23,16 +33,10 @@ window.authstate = function authState() {
             sessionStorage.setItem("Email", user.email);
             sessionStorage.setItem("Full_Name", user.displayName);
             sessionStorage.setItem("Register_Date", user.metadata.creationTime);
-
             if (user.email.includes("@iotbaystaff")) {
                 sessionStorage.setItem("isStaff", "TRUE");
             } else {
                 sessionStorage.setItem("isStaff", "FALSE");
-            }
-
-            if (location.pathname == "/" || location.pathname.includes("index")) {
-            } else if (location.pathname.includes("login") || location.pathname.includes("register")) {
-                location.href = "index.html";
             }
         } else {
             if (location.pathname == "/" || location.pathname.includes("index")) {
@@ -64,19 +68,21 @@ window.register = async function register() {
             sessionStorage.setItem("Full_Name", full_name);
             await updateProfile(user, {
                 displayName: sessionStorage.getItem("Full_Name")
-            }).then(function () {
+            }).then(async function () {
                 sessionStorage.setItem("Customer_Type", 1);
                 sessionStorage.setItem("Customer_ID", user.uid);
                 sessionStorage.setItem("Email", user.email);
                 sessionStorage.setItem("Register_Date", user.metadata.creationTime);
                 sessionStorage.setItem("isStaff", "FALSE");
+                await sendLog(user.uid, "Signed up for system", "Customer");
                 location.href = "index.html";
-            }, function (error) {
+            }, async function (error) {
                 sessionStorage.removeItem("Full_Name");
                 document.getElementById("error_message").innerHTML = error;
+                await sendLog("Unknown", "Failed to update name of the email: " + email, "Customer");
             });
         })
-        .catch((error) => {
+        .catch(async (error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
             console.log(errorCode, errorMessage);
@@ -92,6 +98,7 @@ window.register = async function register() {
                     location.reload();
                 }, 5000);
             }
+            await sendLog("Unknown", "Failed sign up attempt with email: " + email, "Customer");
         });
 }
 
@@ -105,7 +112,7 @@ window.login = async function login() {
     }
 
     await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
             const user = userCredential.user;
             sessionStorage.setItem("Customer_Type", 1);
             sessionStorage.setItem("Customer_ID", user.uid);
@@ -114,12 +121,14 @@ window.login = async function login() {
             sessionStorage.setItem("Register_Date", user.metadata.creationTime);
             if (user.email.includes("@iotbaystaff")) {
                 sessionStorage.setItem("isStaff", "TRUE");
+                await sendLog(user.uid, "Logged into system", "Admin");
             } else {
                 sessionStorage.setItem("isStaff", "FALSE");
+                await sendLog(user.uid, "Logged into system", "Customer");
             }
             location.href = "index.html";
         })
-        .catch((error) => {
+        .catch(async (error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
             console.log(errorCode, errorMessage);
@@ -133,6 +142,7 @@ window.login = async function login() {
                     location.reload();
                 }, 5000);
             }
+            await sendLog("Unknown", "Failed login attempt with email: " + email, "Customer");
         });
 }
 
@@ -220,14 +230,18 @@ window.updateProduct = async function updateProduct(id, price, stock) {
             Price: parseFloat(setPrice),
             Stock: setStock
         }, { merge: true });
+        await sendLog(sessionStorage.getItem("Customer_ID"), "Set price of product (" + id + ") to $" + parseFloat(setPrice), "Admin");
+        await sendLog(sessionStorage.getItem("Customer_ID"), "Set stock of product (" + id + ") to " + setStock, "Admin");
     } else if (!isNaN(parseFloat(setPrice)) && !Number.isInteger(setStock)) {
         await setDoc(doc(db, "products", id), {
             Price: parseFloat(setPrice)
         }, { merge: true });
-    } else if (Number.isInteger(setStock) && isNaN(parseFloat(setPrice))){
+        await sendLog(sessionStorage.getItem("Customer_ID"), "Set price of product (" + id + ") to $" + parseFloat(setPrice), "Admin");
+    } else if (Number.isInteger(setStock) && isNaN(parseFloat(setPrice))) {
         await setDoc(doc(db, "products", id), {
             Stock: setStock
         }, { merge: true });
+        await sendLog(sessionStorage.getItem("Customer_ID"), "Set stock of product (" + id + ") to " + setStock, "Admin");
     } else {
         alert("Invalid input fields: One or more input fields is invalid.");
     }
@@ -305,6 +319,11 @@ window.sendOrder = async function sendOrder() {
                         products: products,
                         customerId: sessionStorage.getItem("Customer_ID")
                     });
+                    if (sessionStorage.getItem("isStaff") == "TRUE") {
+                        await sendLog(sessionStorage.getItem("Customer_ID"), "Order was made with tracking ID: " + trackingId, "Admin");
+                    } else {
+                        await sendLog(sessionStorage.getItem("Customer_ID"), "Order was made with tracking ID: " + trackingId, "Customer");
+                    }
                 }
             }
         }
@@ -339,13 +358,61 @@ window.getOrderViaTracking = async function getOrderViaTracking(id) {
     }
 }
 
+window.findAllLogs = async function findAllLogs() {
+    var array = [];
+    const q = query(collection(db, "logs"), orderBy("logTimestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        var json = {
+            Id: doc.id,
+            data: doc.data()
+        }
+        array.push(json);
+    });
+    sessionStorage.setItem("Logs", JSON.stringify(array));
+}
+
+window.findUserLogs = async function findUserLogs(id) {
+    var array = [];
+    const q = query(collection(db, "logs"), orderBy("logTimestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        if ((doc.id).includes(id) == true) {
+            var json = {
+                Id: doc.id,
+                data: doc.data()
+            }
+            array.push(json);
+        }
+    });
+    sessionStorage.setItem("User_Logs", JSON.stringify(array));
+}
+
+
+window.resetPassword = async function resetPassword(email, element) {
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            document.getElementById(element).innerHTML = "Password reset sent to email.";
+        })
+        .catch((error) => {
+            document.getElementById(element).innerHTML = "Error reseting password: Please try again later.";
+        });
+
+}
+
 window.logout = function logout() {
-    signOut(auth).then(() => {
+    signOut(auth).then(async () => {
+        if (sessionStorage.getItem("isStaff") == "TRUE") {
+            await sendLog(sessionStorage.getItem("Customer_ID"), "Logged out of system", "Admin");
+        } else {
+            await sendLog(sessionStorage.getItem("Customer_ID"), "Logged out of system", "Customer");
+        }
         sessionStorage.removeItem("Email");
         sessionStorage.removeItem("Customer_ID");
         sessionStorage.removeItem("isStaff");
         sessionStorage.removeItem("Register_Date");
         sessionStorage.removeItem("Full_Name");
+        sessionStorage.removeItem("Logs");
         sessionStorage.setItem("Customer_Type", 0);
         location.href = "index.html";
     }).catch((error) => {

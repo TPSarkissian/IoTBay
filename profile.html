@@ -16,11 +16,13 @@
         <li><a href="receipts.html">Receipts</a></li>
         <div id="not_anon">
             <li><a href="profile.html" class="active">Profile</a></li>
+            <li><a href="accesslogs.html">Access Logs</a></li>
         </div>
         <div id="staff_only">
             <br>
             <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a></li>
             <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html">Stock</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="logs.html">Admin Logs</a></li>
         </div>
         <div class="bottom_button">
             <button id="action_button" type="button"></button>
@@ -37,6 +39,9 @@
                 <h5 id="rd_output">Register Date:</h5>
                 <h5 id="staff_output">Membership Status: </h5>
                 <h5 id="uid_output">User ID: </h5>
+                <button id="password_reset" onclick="sendPasswordReset()" style="background-color: #840032;">Reset
+                    Password</button>
+                <br>
                 <div id="shipping_details">
                     <br>
                     <h4>Saved Shipping Details</h4>
@@ -46,8 +51,8 @@
                     <h5 id="city_output">City: </h5>
                     <h5 id="state_output">State: </h5>
                     <h5 id="postal_output">Postal Address: </h5>
-                    <button id="clear_saved_shipping" onclick="clearSavedShipping()" style="background-color: #840032;">Delete Saved Shipping Details</button>
-                    <br>
+                    <button id="clear_saved_shipping" onclick="clearSavedShipping()"
+                        style="background-color: #840032;">Delete Saved Shipping Details</button>
                 </div>
                 <div id="payment_details">
                     <br>
@@ -55,9 +60,13 @@
                     <h5 id="cn_output">Card Number: </h5>
                     <h5 id="expiry_output">Expiry: </h5>
                     <h5 id="cvv_output">CVV: </h5>
-                    <button id="clear_saved_payment" onclick="clearSavedPayment()" style="background-color: #840032;">Delete Saved Payment Information</button>
-                    <br>
+                    <button id="clear_saved_payment" onclick="clearSavedPayment()"
+                        style="background-color: #840032;">Delete Saved Payment Information</button>
                 </div>
+                <br>
+                <br>
+                <button id="password_reset" onclick="fakeDeleteAccount()" style="background-color: #840032;">DELETE
+                    ACCOUNT</button>
             </div>
         </div>
     </div>
@@ -70,6 +79,15 @@
 
     var customerType = sessionStorage.getItem("Customer_Type");
 
+    function sendPasswordReset() {
+        resetPassword(sessionStorage.getItem('Email'), "password_reset");
+    }
+
+    function fakeDeleteAccount() {
+        if (window.confirm("Are you sure you want to delete your account?")) {
+            logout();
+        }
+    }
 
     function maskCardNumber(debitCardNumber) {
         var numLength = debitCardNumber.length;
