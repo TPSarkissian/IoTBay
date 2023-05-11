@@ -156,6 +156,14 @@ li a:hover:not(.active) {
     bottom: 10px;
 }
 
+.shop-sales {
+    position: absolute;
+    right: 20px;
+    transform: translate(0%, -175%);
+    color: #0000ff;
+    font-weight: bold;
+}
+
 .container {
     margin-left: 200px;
     margin-right: 50px;

@@ -209,19 +209,6 @@ window.loadProduct = async function loadProduct(id) {
     }
 }
 
-window.updateProduct = async function loadProduct(id) {
-    const docRef = doc(db, "products", id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        sessionStorage.setItem("Product_Description", docSnap.data()["Description"]);
-        sessionStorage.setItem("Product_Img", docSnap.data()["Img"]);
-        sessionStorage.setItem("Product_Name", docSnap.data()["Name"]);
-        sessionStorage.setItem("Product_Price", docSnap.data()["Price"]);
-        sessionStorage.setItem("Product_Stock", docSnap.data()["Stock"]);
-        sessionStorage.setItem("Product_ID", id);
-    }
-}
-
 window.updateProduct = async function updateProduct(id, price, stock) {
     var setPrice = parseFloat(price).toFixed(2);
     var setStock = parseInt(stock);
@@ -299,7 +286,8 @@ window.sendOrder = async function sendOrder() {
                     return false;
                 } else {
                     await setDoc(doc(db, "products", itemName), {
-                        Stock: stockSnap.data()["Stock"] - products[itemName]["quantity"]
+                        Stock: stockSnap.data()["Stock"] - products[itemName]["quantity"],
+                        Sales: stockSnap.data()["Sales"] + products[itemName]["quantity"]
                     }, { merge: true });
                     await setDoc(doc(db, "orders", (trackingId)), {
                         orderId: generateNoRandomString(10),
@@ -386,6 +374,24 @@ window.findUserLogs = async function findUserLogs(id) {
         }
     });
     sessionStorage.setItem("User_Logs", JSON.stringify(array));
+}
+
+window.getTopProducts = async function getTopProducts(count) {
+    var array = [];
+    const q = query(collection(db, "products"), orderBy("Sales", "desc"));
+    const querySnapshot = await getDocs(q);
+    var i = 0;
+    querySnapshot.forEach((doc) => {
+        if (i < count) {
+            var json = {
+                Id: doc.id,
+                data: doc.data()
+            }
+            array.push(json);
+            i = i + 1;
+        }
+    });
+    sessionStorage.setItem("Best_Sellers", JSON.stringify(array));
 }
 
 

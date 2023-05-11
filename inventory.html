@@ -22,9 +22,10 @@
             <br>
             <li style="background-color: #E59500;"><a style="color: #FFF;" href="orders.html">Orders</a>
             </li>
-            <li style="background-color: #E59500;"><a style="color: #FFF;" href="stock.html" class="active">Stock</a>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="inventory.html" class="active">Inventory</a>
             </li>
-            <li style="background-color: #E59500;"><a style="color: #FFF;" href="logs.html">Admin Logs</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="adminlogs.html">Admin Logs</a></li>
+            <li style="background-color: #E59500;"><a style="color: #FFF;" href="reporting.html">Reporting</a></li>
         </div>
         <div class="bottom_button">
             <button id="action_button" type="button"></button>
@@ -73,12 +74,6 @@
         return result;
     }
 
-    async function openProductView(id) {
-        await loadProduct(id);
-        sessionStorage.setItem("Come_From", location.href);
-        location.href = 'product.html';
-    }
-
     async function updateSelectedProduct(id, price, stock, e) {
         await updateProduct(id, price, stock);
         var setPrice = parseFloat(price).toFixed(2);
@@ -107,22 +102,23 @@
             var name = products[i]["Name"];
             var price = products[i]["Price"];
             var stock = products[i]["Stock"];
+            var sales = products[i]["Sales"];
             if (search != null) {
                 if (name.toLowerCase().includes(search.toLowerCase())) {
                     document.getElementById("reset_query").style.display = "inline";
                     if (stock <= 0) {
-                        document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button style="background-color: #840032" onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
+                        document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><div class="shop-sales">Sales:' + sales + '</div><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button style="background-color: #840032" onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
                     } else {
-                        document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
+                        document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><div class="shop-sales">Sales:' + sales + '</div><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
                     }
                 }
             } else {
                 document.getElementById("search_box").value = "";
                 document.getElementById("reset_query").style.display = "none";
                 if (stock <= 0) {
-                    document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button style="background-color: #840032" onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
+                    document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><div class="shop-sales">Sales:' + sales + '</div><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button style="background-color: #840032" onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
                 } else {
-                    document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
+                    document.getElementById("products_view").innerHTML = document.getElementById("products_view").innerHTML + '<div class="shop-box"><img src="' + image + '"><div class="shop-sales">Sales:' + sales + '</div><h4>' + name + '</h4><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Product Price ($)</h5><input type="text" style="width: calc(100% - 25px);" placeholder="' + price.toFixed(2) + '" id="price_box" name="Price"><h5 style="transform: initial; position: initial; margin-bottom: 10px;">Stock Available</h5><input type="text" style="width: calc(100% - 25px); margin-bottom: 0px;" placeholder="' + stock + '" id="stock_box" name="Stock"><button onclick="updateSelectedProduct(' + "'" + (i + 1) + "'" + ',this.parentNode.getElementsByTagName(' + "'input'" + ')[0].value,this.parentNode.getElementsByTagName(' + "'input'" + ')[1].value, this.parentNode)">Update</button></div>';
                 }
             }
         }
