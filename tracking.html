@@ -40,15 +40,13 @@
             <div id="container_bottom">
                 <div class="left_placeholder"
                     style="border: 1px #FFF solid; padding-right: 20px; padding-left: 20px; border-radius: 5px;">
-                    <div style="display: inline-block;">
+                    <div style="display: inline-block; position: absolute; top: 50%; transform: translate(0%, -50%);">
                         <h5 id="order_status"></h5>
                         <h5 id="order_total"></h5>
                         <h5 id="order_date"></h5>
                         <h5 id="tracking_id"></h5>
-                        <h5 id="order_id"></h5>
-                        <h5 id="transaction_id"></h5>
                     </div>
-                    <div style="padding-left: 50px; display: inline-block;">
+                    <div style="margin-left: 400px; display: inline-block;">
                         <h5 id="shipping_type"></h5>
                         <h5 id="shipping_country"></h5>
                         <h5 id="shipping_state"></h5>
@@ -90,7 +88,6 @@
         updateCart();
         if (trackingID == sessionStorage.getItem("Tracking_ID")) {
             document.getElementById("order_date").innerHTML = "Order Date: " + sessionStorage.getItem("Order_Date");
-            document.getElementById("order_id").innerHTML = "Order ID: " + sessionStorage.getItem("Order_ID");
             var order_status = sessionStorage.getItem("Order_Status");
             if (order_status == "Processing") {
                 document.getElementById("order_status").innerHTML = "Order Status: <span style='color: #EE4B2B'>" + order_status + "</span>";
@@ -106,7 +103,6 @@
             document.getElementById("shipping_country").innerHTML = "Shipping Country: " + sessionStorage.getItem("Shipping_Country");
             document.getElementById("shipping_state").innerHTML = "Shipping State: " + sessionStorage.getItem("Shipping_State");
             document.getElementById("shipping_postal_address").innerHTML = "Shipping Postal Address: " + sessionStorage.getItem("Shipping_Postal");
-            document.getElementById("transaction_id").innerHTML = "Transaction ID: " + sessionStorage.getItem("Transaction_ID");
             document.getElementById("tracking_id").innerHTML = "Tracking Number: " + sessionStorage.getItem("Tracking_ID");
         } else {
             document.getElementById("tacking_container").innerHTML = "<h3>Can't find order...</h3>"

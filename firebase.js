@@ -330,7 +330,6 @@ window.getOrderViaTracking = async function getOrderViaTracking(id) {
         sessionStorage.setItem("Order_Date", docSnap.data()["orderDate"]);
         sessionStorage.setItem("Order_Arrival", docSnap.data()["orderArrival"]);
         sessionStorage.setItem("Order_Status", docSnap.data()["orderStatus"]);
-        sessionStorage.setItem("Order_ID", docSnap.data()["orderId"]);
         sessionStorage.setItem("Order_Total", docSnap.data()["orderTotal"]);
         sessionStorage.setItem("Order_Products", JSON.stringify(docSnap.data()["products"]));
         sessionStorage.setItem("Shipping_Order_Total", docSnap.data()["orderTotal"]);
@@ -342,7 +341,6 @@ window.getOrderViaTracking = async function getOrderViaTracking(id) {
         sessionStorage.setItem("Shipping_Postal", docSnap.data()["shippingPostalAddress"]);
         sessionStorage.setItem("Shipping_Total", docSnap.data()["shippingTotal"]);
         sessionStorage.setItem("Shipping_Type", docSnap.data()["shippingType"]);
-        sessionStorage.setItem("Transaction_ID", docSnap.data()["transactionId"]);
     }
 }
 
